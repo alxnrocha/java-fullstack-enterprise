@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build Outputs
+dist/
+build/
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+# Environment and Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# IDE and OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Testing and Coverage
+coverage/
+.nyc_output/
+
+# Internal Workflow / Prompts (Mandatory Protocol)
+design/PROMPTS.md
+STATUS_PROGRESSO.md
