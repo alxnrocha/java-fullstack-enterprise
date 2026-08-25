@@ -163,24 +163,30 @@ erDiagram
 
 ## 4. Plano de Milestones & Issues (Protocolo FORGE-DEV)
 
-### Milestone 1: Fundação Backend & Arquitetura Event-Driven (Issues 1 a 6)
-- **Issue 1:** Bootstrap multi-módulo Java 21 LTS + Spring Boot 3.3 backend e React 19 SPA client.
-- **Issue 2:** Configurar PostgreSQL 17 Flyway migrations (`V1__initial_schema.sql`, `V2__seed_supply_chain.sql`).
-- **Issue 3:** Desenvolver entidades JPA, repositórios com queries customizadas e enums de domínio.
-- **Issue 4:** Implementar infraestrutura RabbitMQ e configuração de filas, exchanges e routing keys.
-- **Issue 5:** Desenvolver motor do **Transactional Outbox Pattern** com scheduler atômico de publicação.
-- **Issue 6:** Implementar controllers REST da API (`/inventory`, `/warehouses`, `/shipments`, `/outbox`, `/telemetry`) com OpenAPI Swagger.
+### Milestone 1: Multi-Module Scaffolding & PostgreSQL Database Schema
+- **Issue #1:** Bootstrap multi-module Java 21 LTS + Spring Boot 3.3 backend and React 19 SPA client.
+- **Issue #3:** Implement PostgreSQL 17 Flyway migrations for supply chain schema and demo seeds.
+- **Issue #4:** Develop JPA entities, repositories with custom JPQL queries, and domain enums.
 
-### Milestone 2: Frontend Industrial & Mock Engine Standalone (Issues 7 a 13)
-- **Issue 7:** Desenvolver sistema de design Enterprise ERP (Tailwind v4), layout mestre e navegação.
-- **Issue 8:** Implementar mock database engine e cliente API tipado para execução standalone no GitHub Pages.
-- **Issue 9:** Construir dashboard geral de Supply Chain com KPIs executivos, mapa de rotas logísticas e gráficos Recharts.
-- **Issue 10:** Desenvolver matriz de estoque multi-armazém com TanStack Table v8, filtros e visualizador de SKU.
-- **Issue 11:** Construir terminal de separação e expedição com checklist guiado e disparo de evento Outbox.
-- **Issue 12:** Implementar painel de rastreamento de remessas e frotas com mapa interativo e linha do tempo de trânsito.
-- **Issue 13:** Desenvolver torre de observabilidade de eventos Outbox, telemetria RabbitMQ e inspeção de payloads JSON.
+### Milestone 2: RabbitMQ AMQP Infrastructure & Transactional Outbox Pattern
+- **Issue #5:** Configure RabbitMQ infrastructure, exchange bindings, queues, and DLQ routing.
+- **Issue #6:** Develop Transactional Outbox Pattern engine with atomic scheduler publisher.
 
-### Milestone 3: Testes Automatizados, Documentação Executiva & Deploy (Issues 14 a 16)
-- **Issue 14:** Desenvolver suíte automatizada de testes com JUnit 5, Mockito, Testcontainers (PostgreSQL + RabbitMQ) e Vitest.
-- **Issue 15:** Implementar pipeline CI/CD GitHub Actions, documentação técnica em espanhol e deploy no GitHub Pages.
-- **Issue 16:** Configurar repositório GitHub com topics oficiais, About, Homepage e Licença MIT.
+### Milestone 3: REST API Controllers & Prometheus Observability Metrics
+- **Issue #7:** Build REST API controllers (/inventory, /warehouses, /shipments, /outbox, /telemetry) with OpenAPI Swagger.
+
+### Milestone 4: Industrial Design System & Standalone Mock Database Engine
+- **Issue #10:** Implement Enterprise ERP design system (Tailwind v4), navigation shell, and theme tokens.
+- **Issue #8:** Develop standalone mock database engine and typed API client for GitHub Pages demo mode.
+
+### Milestone 5: Enterprise React 19 Logistics & Supply Chain UI Modules
+- **Issue #9:** Build executive Supply Chain dashboard with KPI summary, route network map, and Recharts trends.
+- **Issue #11:** Develop multi-warehouse inventory matrix using TanStack Table v8 with SKU drawer and filters.
+- **Issue #12:** Build warehouse picking and packing terminal with barcode checklist and outbox dispatch trigger.
+- **Issue #13:** Implement fleet and shipment tracking control tower with interactive route map and transit timeline.
+- **Issue #14:** Develop outbox event inspector, RabbitMQ queue telemetry, and JSON payload viewer.
+
+### Milestone 6: Automated Quality Assurance, CI/CD Pipeline & Production Deploy
+- **Issue #15:** Write comprehensive automated test suite with JUnit 5, Mockito, Testcontainers (PostgreSQL + RabbitMQ) and Vitest.
+- **Issue #16:** Configure GitHub Actions CI/CD pipeline, executive Spanish documentation, MIT License, and GitHub Pages deploy.
+- **Issue #17:** Configure official GitHub repository settings (About, Homepage, Topics, and Badges).
