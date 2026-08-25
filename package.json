@@ -1,0 +1,25 @@
+{
+  "name": "logisync-enterprise",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LogiSync Enterprise — ERP Full Stack & Event-Driven Supply Chain",
+  "scripts": {
+    "dev": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "test": "npm --prefix client run test",
+    "lint": "npm --prefix client run lint"
+  },
+  "keywords": [
+    "supply-chain",
+    "erp",
+    "logistics",
+    "event-driven",
+    "rabbitmq",
+    "spring-boot",
+    "react19",
+    "typescript",
+    "postgresql"
+  ],
+  "author": "Marcos Alexandr Nogueira Rocha",
+  "license": "MIT"
+}
