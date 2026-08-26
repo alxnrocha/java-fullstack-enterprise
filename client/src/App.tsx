@@ -3,15 +3,14 @@ import { Sidebar } from './components/layout/Sidebar.tsx';
 import { QuickActionModals } from './components/layout/QuickActionModals.tsx';
 import { useSupplyChainStore } from './stores/useSupplyChainStore.ts';
 import { 
-  Truck, 
   Building2, 
-  Navigation, 
   Activity 
 } from 'lucide-react';
 
 import { ExecutiveDashboard } from './components/dashboard/ExecutiveDashboard.tsx';
 import { InventoryMatrix } from './components/inventory/InventoryMatrix.tsx';
 import { PickingTerminal } from './components/picking/PickingTerminal.tsx';
+import { FleetTrackingTower } from './components/tracking/FleetTrackingTower.tsx';
 
 export default function App() {
   const { activeTab } = useSupplyChainStore();
@@ -31,20 +30,17 @@ export default function App() {
           {activeTab === 'home' && <ExecutiveDashboard />}
           {activeTab === 'inventory' && <InventoryMatrix />}
           {activeTab === 'picking' && <PickingTerminal />}
-          {activeTab !== 'home' && activeTab !== 'inventory' && activeTab !== 'picking' && (
+          {(activeTab === 'shipments' || activeTab === 'tracking') && <FleetTrackingTower />}
+          {activeTab !== 'home' && activeTab !== 'inventory' && activeTab !== 'picking' && activeTab !== 'shipments' && activeTab !== 'tracking' && (
             <div className="clean-card rounded-2xl p-6 bg-white border border-slate-200 shadow-xs">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-4">
               <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                {activeTab === 'shipments' && <Truck className="w-5 h-5" />}
                 {activeTab === 'warehouses' && <Building2 className="w-5 h-5" />}
-                {activeTab === 'tracking' && <Navigation className="w-5 h-5" />}
                 {activeTab === 'outbox' && <Activity className="w-5 h-5" />}
               </div>
               <div>
                 <h2 className="text-lg font-bold text-slate-900 capitalize">
-                  {activeTab === 'shipments' && 'Freight Logistics & Active Cargo Shipments'}
                   {activeTab === 'warehouses' && 'European Logistics Hubs & Pallet Capacity'}
-                  {activeTab === 'tracking' && 'Live Cargo Telemetry & Route Map'}
                   {activeTab === 'outbox' && 'Transactional Outbox & RabbitMQ Observability'}
                 </h2>
                 <p className="text-xs text-slate-500 font-medium">
