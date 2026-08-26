@@ -59,7 +59,7 @@ describe('MockEngine Database & Event Dispatcher', () => {
       destinationCity: 'Milan',
       destinationCountry: 'Italy',
       carrier: 'DHL Freight',
-      transportMode: 'ROAD'
+      transportMode: 'ROAD_FREIGHT'
     });
 
     expect(newShipment).toBeDefined();
