@@ -9,6 +9,11 @@ export default defineConfig({
     tailwindcss(),
   ],
   base: '/java-fullstack-enterprise/',
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.ts',
+  },
   server: {
     port: 5173,
     proxy: {
