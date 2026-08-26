@@ -27,6 +27,15 @@ class MockEngine {
   private telemetry: TelemetryMetrics = { ...initialTelemetryMetrics };
 
   // --- Warehouses ---
+  public reset(): void {
+    this.warehouses = [...initialWarehouses];
+    this.inventory = [...initialInventory];
+    this.shipments = [...initialShipments];
+    this.pickingBatch = JSON.parse(JSON.stringify(initialPickingBatch));
+    this.outboxEvents = [...initialOutboxEvents];
+    this.telemetry = { ...initialTelemetryMetrics };
+  }
+
   public getWarehouses(): Warehouse[] {
     return [...this.warehouses];
   }
@@ -206,7 +215,7 @@ class MockEngine {
 
     event.status = 'PUBLISHED';
     event.errorMemo = null;
-    event.retryCount = 0;
+    event.retryCount += 1;
     event.publishedAt = new Date().toISOString();
     return { ...event };
   }
