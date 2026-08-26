@@ -17,28 +17,38 @@ export const EuropeRouteMap: React.FC = () => {
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
-    if (mapInstanceRef.current) return; // already initialized
+    if (mapInstanceRef.current) return; // prevent duplicate init
 
-    // 1. Initialize Real Leaflet Map centered on Central/Western Europe
+    // 1. Initialize Leaflet Map without generic zoom buttons
     const map = L.map(mapContainerRef.current, {
       center: [48.5, 4.5],
       zoom: 5,
       minZoom: 4,
       maxZoom: 9,
-      zoomControl: true,
+      zoomControl: false, // clean custom HUD
       scrollWheelZoom: false,
     });
 
     mapInstanceRef.current = map;
 
-    // 2. High-Performance Dark Matter Tile Layer (CartoDB)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 19,
-    }).addTo(map);
+    // 2. High-Definition ESRI Dark Gray Canvas (Official, Public, No Watermark, No API Key)
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      {
+        attribution: '&copy; Esri, DeLorme, NAVTEQ &bull; OpenStreetMap',
+        maxZoom: 16,
+      }
+    ).addTo(map);
 
-    // 3. Real European Logistics Hub Coordinates
+    // Complementary Reference Layer (Geographic borders, coastlines, and major cities)
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+      {
+        maxZoom: 16,
+      }
+    ).addTo(map);
+
+    // 3. European Logistics Hub Coordinates
     const hubs = [
       { name: 'Rotterdam Central', code: 'W-ROT-01', lat: 51.9244, lng: 4.4777, isMain: true },
       { name: 'Frankfurt Terminal', code: 'W-FRA-03', lat: 50.1109, lng: 8.6821, isMain: true },
@@ -60,19 +70,19 @@ export const EuropeRouteMap: React.FC = () => {
             border-radius: 50%; 
             background: ${hub.isMain ? '#3B82F6' : '#64748B'}; 
             border: 2px solid #FFFFFF; 
-            box-shadow: 0 0 10px ${hub.isMain ? 'rgba(59, 130, 246, 0.8)' : 'rgba(100, 116, 139, 0.5)'};
+            box-shadow: 0 0 12px ${hub.isMain ? 'rgba(59, 130, 246, 0.9)' : 'rgba(100, 116, 139, 0.6)'};
           "></div>
           <div style="
-            background: rgba(15, 23, 42, 0.85); 
+            background: rgba(15, 23, 42, 0.92); 
             border: 1px solid #334155; 
-            border-radius: 4px; 
-            padding: 1px 5px; 
-            margin-top: 3px; 
+            border-radius: 5px; 
+            padding: 2px 6px; 
+            margin-top: 4px; 
             white-space: nowrap;
             color: #FFFFFF; 
-            font-size: ${hub.isMain ? '10px' : '9px'}; 
+            font-size: ${hub.isMain ? '11px' : '9.5px'}; 
             font-weight: 700;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.6);
           ">
             ${hub.name}
           </div>
@@ -87,16 +97,16 @@ export const EuropeRouteMap: React.FC = () => {
 
       const marker = L.marker([hub.lat, hub.lng], { icon }).addTo(map);
       marker.bindPopup(`
-        <div style="padding: 4px; font-family: sans-serif;">
-          <h4 style="margin: 0; font-size: 12px; font-weight: 800; color: #60A5FA;">${hub.name}</h4>
-          <p style="margin: 2px 0 0; font-size: 10px; color: #94A3B8;">Code: <strong style="color: #FFF;">${hub.code}</strong></p>
-          <p style="margin: 2px 0 0; font-size: 10px; color: #10B981;">● Operational • Cross-docking Active</p>
+        <div style="padding: 6px; font-family: sans-serif;">
+          <h4 style="margin: 0; font-size: 13px; font-weight: 800; color: #60A5FA;">${hub.name}</h4>
+          <p style="margin: 3px 0 0; font-size: 11px; color: #94A3B8;">Code: <strong style="color: #FFF;">${hub.code}</strong></p>
+          <p style="margin: 4px 0 0; font-size: 11px; color: #10B981; font-weight: 600;">● Operational • Cross-docking Active</p>
         </div>
       `);
     });
 
     // 4. Real Freight Transit Corridors (Polylines)
-    // Corridor 1: Rotterdam -> Antwerp -> Paris -> Lyon -> Barcelona
+    // Corridor 1: Rotterdam -> Antwerp -> Paris -> Lyon -> Barcelona (West Spine)
     const routeRotterdamBarcelona: [number, number][] = [
       [51.9244, 4.4777],
       [51.2194, 4.4025],
@@ -112,7 +122,7 @@ export const EuropeRouteMap: React.FC = () => {
       dashArray: '6, 6',
     }).addTo(map);
 
-    // Corridor 2: Rotterdam -> Eindhoven -> Cologne -> Frankfurt -> Nuremberg -> Berlin
+    // Corridor 2: Rotterdam -> Eindhoven -> Cologne -> Frankfurt -> Nuremberg -> Berlin (Industrial Axis)
     const routeRotterdamBerlin: [number, number][] = [
       [51.9244, 4.4777],
       [51.4416, 5.4697],
@@ -124,11 +134,11 @@ export const EuropeRouteMap: React.FC = () => {
     L.polyline(routeRotterdamBerlin, {
       color: '#10B981',
       weight: 3,
-      opacity: 0.8,
+      opacity: 0.85,
       dashArray: '5, 5',
     }).addTo(map);
 
-    // Corridor 3: Frankfurt -> Basel -> Milan
+    // Corridor 3: Frankfurt -> Basel -> Milan (Alpine Axis)
     const routeFrankfurtMilan: [number, number][] = [
       [50.1109, 8.6821],
       [47.5596, 7.5886],
@@ -137,28 +147,28 @@ export const EuropeRouteMap: React.FC = () => {
     L.polyline(routeFrankfurtMilan, {
       color: '#8B5CF6',
       weight: 2.5,
-      opacity: 0.7,
+      opacity: 0.75,
       dashArray: '4, 4',
     }).addTo(map);
 
     // 5. Active Moving Trucks (Live Telemetry Markers)
     // Truck 1: TRK-45872 (DHL Freight) in Rhone Valley near Lyon
     const truck1Html = `
-      <div style="cursor: pointer; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 6px;">
-        <div style="position: relative; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
-          <div style="position: absolute; inset: 0; border-radius: 50%; background: #3B82F6; opacity: 0.4; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
-          <div style="width: 10px; height: 10px; border-radius: 50%; background: #2563EB; border: 2px solid #FFFFFF; z-index: 10;"></div>
+      <div style="cursor: pointer; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 8px;">
+        <div style="position: relative; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;">
+          <div style="position: absolute; inset: 0; border-radius: 50%; background: #3B82F6; opacity: 0.45; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+          <div style="width: 11px; height: 11px; border-radius: 50%; background: #2563EB; border: 2px solid #FFFFFF; z-index: 10;"></div>
         </div>
         <div style="
-          background: rgba(15, 23, 42, 0.92); 
+          background: rgba(15, 23, 42, 0.95); 
           border: 1px solid #3B82F6; 
           border-radius: 6px; 
-          padding: 2px 7px; 
+          padding: 3px 8px; 
           white-space: nowrap; 
-          box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+          box-shadow: 0 4px 14px rgba(0,0,0,0.6);
         ">
-          <div style="color: #60A5FA; font-family: monospace; font-size: 10px; font-weight: 800;">TRK-45872 (84 km/h)</div>
-          <div style="color: #94A3B8; font-size: 8px;">DHL • Lyon Sector • 78%</div>
+          <div style="color: #60A5FA; font-family: monospace; font-size: 11px; font-weight: 800;">TRK-45872 (84 km/h)</div>
+          <div style="color: #94A3B8; font-size: 9px;">DHL Express &bull; Lyon Corridor &bull; 78%</div>
         </div>
       </div>
     `;
@@ -171,21 +181,21 @@ export const EuropeRouteMap: React.FC = () => {
 
     // Truck 2: TRK-88491 (Kuehne + Nagel) in Rhine Valley near Cologne
     const truck2Html = `
-      <div style="cursor: pointer; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 6px;">
-        <div style="position: relative; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
-          <div style="position: absolute; inset: 0; border-radius: 50%; background: #10B981; opacity: 0.4; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
-          <div style="width: 10px; height: 10px; border-radius: 50%; background: #059669; border: 2px solid #FFFFFF; z-index: 10;"></div>
+      <div style="cursor: pointer; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 8px;">
+        <div style="position: relative; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;">
+          <div style="position: absolute; inset: 0; border-radius: 50%; background: #10B981; opacity: 0.45; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+          <div style="width: 11px; height: 11px; border-radius: 50%; background: #059669; border: 2px solid #FFFFFF; z-index: 10;"></div>
         </div>
         <div style="
-          background: rgba(15, 23, 42, 0.92); 
+          background: rgba(15, 23, 42, 0.95); 
           border: 1px solid #10B981; 
           border-radius: 6px; 
-          padding: 2px 7px; 
+          padding: 3px 8px; 
           white-space: nowrap; 
-          box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+          box-shadow: 0 4px 14px rgba(0,0,0,0.6);
         ">
-          <div style="color: #34D399; font-family: monospace; font-size: 10px; font-weight: 800;">TRK-88491 (91 km/h)</div>
-          <div style="color: #94A3B8; font-size: 8px;">K+N • Rhine Sector • 45%</div>
+          <div style="color: #34D399; font-family: monospace; font-size: 11px; font-weight: 800;">TRK-88491 (91 km/h)</div>
+          <div style="color: #94A3B8; font-size: 9px;">K+N Logistics &bull; Rhine Corridor &bull; 45%</div>
         </div>
       </div>
     `;
@@ -203,8 +213,8 @@ export const EuropeRouteMap: React.FC = () => {
   }, [setActiveTab, setSelectedShipmentTracking]);
 
   return (
-    <div className="clean-card bg-slate-900 border border-slate-800 rounded-2xl p-6 text-white overflow-hidden shadow-lg relative">
-      {/* Map Header - Clean Flex Row with Zero Text Collision */}
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-white overflow-hidden shadow-lg relative">
+      {/* Map Header - Pure Dark Mode with Crisp White Title and Aligned Badges */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 z-10 relative">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center justify-center shrink-0 mt-0.5">
@@ -213,14 +223,14 @@ export const EuropeRouteMap: React.FC = () => {
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
               <h3 className="text-base font-bold text-white tracking-tight">
-                European Logistics Corridors & Fleet Positioning
+                European Logistics Corridors &amp; Fleet Positioning
               </h3>
               <span className="px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-blue-500/20 text-blue-400 border border-blue-400/30 whitespace-nowrap">
                 LIVE TELEMETRY
               </span>
             </div>
             <p className="text-xs text-slate-400 font-medium mt-0.5">
-              Real-time GPS tracking via IoT telematics & AMQP message queues across continental corridors
+              Real-time GPS tracking via IoT telematics &amp; AMQP message queues across continental corridors
             </p>
           </div>
         </div>
@@ -243,11 +253,11 @@ export const EuropeRouteMap: React.FC = () => {
       </div>
 
       {/* Real Geographic Interactive Leaflet Container */}
-      <div className="relative w-full aspect-21/9 min-h-[380px] max-h-[460px] rounded-xl border border-slate-800 overflow-hidden shadow-inner">
+      <div className="relative w-full aspect-21/9 min-h-[380px] max-h-[460px] rounded-xl border border-slate-800 overflow-hidden shadow-inner bg-slate-950">
         <div ref={mapContainerRef} className="w-full h-full z-0" />
 
         {/* Live Truck Telemetry Card Overlay on bottom-left */}
-        <div className="absolute bottom-3 left-3 z-1000 bg-slate-950/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-3 max-w-xs text-xs space-y-1.5 shadow-xl hidden sm:block">
+        <div className="absolute bottom-3 left-3 z-[1000] bg-slate-950/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-3 max-w-xs text-xs space-y-1.5 shadow-xl hidden sm:block">
           <div className="flex items-center justify-between text-slate-400 text-[10px] font-mono-code">
             <span className="font-bold text-blue-400">FREIGHT TELEMATICS</span>
             <span className="text-emerald-400 flex items-center gap-1 font-bold">
