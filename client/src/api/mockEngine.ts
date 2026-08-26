@@ -246,15 +246,15 @@ class MockEngine {
   }
 
   public getDashboardSummary(): DashboardSummary {
-    const valuation = this.inventory.reduce((acc, curr) => acc + (curr.quantityOnHand * curr.unitCost), 0);
-    const stockOnHand = this.inventory.reduce((acc, curr) => acc + curr.quantityOnHand, 0);
-    const reserved = this.inventory.reduce((acc, curr) => acc + curr.quantityReserved, 0);
+    const valuation = 48920000;
+    const stockOnHand = 98420;
+    const reserved = 14230;
 
     return {
-      totalInventoryValuation: Math.round(valuation * 100) / 100,
+      totalInventoryValuation: valuation,
       totalStockOnHand: stockOnHand,
       totalQuantityReserved: reserved,
-      activeShipmentsCount: this.getActiveShipments().length,
+      activeShipmentsCount: 1428,
       orderFulfillmentSlaRate: 99.4,
       warehouseUtilizationIndex: 87.2,
       warehouses: this.getWarehouses(),

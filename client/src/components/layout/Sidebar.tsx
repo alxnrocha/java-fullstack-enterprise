@@ -27,9 +27,9 @@ const navItems: NavItem[] = [
   { id: 'shipments', label: 'Shipments', icon: Truck, badge: '1,428' },
   { id: 'inventory', label: 'Inventory', icon: Package, badge: '3,842' },
   { id: 'warehouses', label: 'Warehouses', icon: Building2 },
-  { id: 'picking', label: 'Picking & Packing', icon: CheckSquare, badge: 'Active' },
+  { id: 'picking', label: 'Picking', icon: CheckSquare, badge: 'Active' },
   { id: 'tracking', label: 'Tracking', icon: Navigation },
-  { id: 'outbox', label: 'Observability & Outbox', icon: Activity, badge: 'Live' },
+  { id: 'outbox', label: 'Outbox Stream', icon: Activity, badge: 'Live' },
 ];
 
 export const Sidebar: React.FC = () => {
@@ -41,7 +41,7 @@ export const Sidebar: React.FC = () => {
   } = useSupplyChainStore();
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col justify-between p-4 min-h-[calc(100vh-4rem)] shrink-0">
+    <aside className="w-64 lg:w-72 bg-white border-r border-slate-200 flex flex-col justify-between p-4 min-h-[calc(100vh-4rem)] shrink-0">
       {/* Primary Navigation List */}
       <div className="space-y-6">
         <div>
@@ -56,18 +56,18 @@ export const Sidebar: React.FC = () => {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
                     isActive
                       ? 'bg-blue-50 text-blue-600 shadow-2xs font-bold'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
-                    <span>{item.label}</span>
+                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
+                    <span className="truncate">{item.label}</span>
                   </div>
                   {item.badge && (
-                    <span className={`text-[10px] font-mono-code px-2 py-0.5 rounded-full ${
+                    <span className={`text-[10px] font-mono-code px-2 py-0.5 rounded-full shrink-0 ml-2 ${
                       isActive 
                         ? 'bg-blue-100 text-blue-700 font-bold' 
                         : 'bg-slate-100 text-slate-500 font-medium'
@@ -89,9 +89,9 @@ export const Sidebar: React.FC = () => {
           <div className="space-y-1">
             <button
               onClick={() => setIsCreateShipmentModalOpen(true)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 transition-colors text-left"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 transition-colors text-left whitespace-nowrap"
             >
-              <PlusCircle className="w-4 h-4 text-blue-500" />
+              <PlusCircle className="w-4 h-4 text-blue-500 shrink-0" />
               <span>Create Shipment</span>
             </button>
 
@@ -100,18 +100,18 @@ export const Sidebar: React.FC = () => {
                 setActiveTab('picking');
                 setIsPickingDrawerOpen(true);
               }}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 transition-colors text-left"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 transition-colors text-left whitespace-nowrap"
             >
-              <Barcode className="w-4 h-4 text-emerald-500" />
-              <span>Barcode Picking Batch</span>
+              <Barcode className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Barcode Picking</span>
             </button>
 
             <button
               onClick={() => setActiveTab('inventory')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 transition-colors text-left"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 transition-colors text-left whitespace-nowrap"
             >
-              <Search className="w-4 h-4 text-amber-500" />
-              <span>Stock Matrix Lookup</span>
+              <Search className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>Stock Matrix</span>
             </button>
           </div>
         </div>
