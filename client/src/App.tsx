@@ -3,7 +3,6 @@ import { Sidebar } from './components/layout/Sidebar.tsx';
 import { QuickActionModals } from './components/layout/QuickActionModals.tsx';
 import { useSupplyChainStore } from './stores/useSupplyChainStore.ts';
 import { 
-  Boxes, 
   Truck, 
   Package, 
   Building2, 
@@ -11,6 +10,8 @@ import {
   Navigation, 
   Activity 
 } from 'lucide-react';
+
+import { ExecutiveDashboard } from './components/dashboard/ExecutiveDashboard.tsx';
 
 export default function App() {
   const { activeTab } = useSupplyChainStore();
@@ -27,11 +28,12 @@ export default function App() {
 
         {/* Dynamic Main Content Container */}
         <main className="flex-1 overflow-y-auto p-6 lg:p-8 space-y-6">
-          {/* Temporary Tab Placeholder until individual modules are assembled */}
-          <div className="clean-card rounded-2xl p-6 bg-white border border-slate-200 shadow-xs">
+          {activeTab === 'home' ? (
+            <ExecutiveDashboard />
+          ) : (
+            <div className="clean-card rounded-2xl p-6 bg-white border border-slate-200 shadow-xs">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-4">
               <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                {activeTab === 'home' && <Boxes className="w-5 h-5" />}
                 {activeTab === 'shipments' && <Truck className="w-5 h-5" />}
                 {activeTab === 'inventory' && <Package className="w-5 h-5" />}
                 {activeTab === 'warehouses' && <Building2 className="w-5 h-5" />}
@@ -41,7 +43,6 @@ export default function App() {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-slate-900 capitalize">
-                  {activeTab === 'home' && 'European Supply Chain & Logistics Control Tower'}
                   {activeTab === 'shipments' && 'Freight Logistics & Active Cargo Shipments'}
                   {activeTab === 'inventory' && 'Multi-Tier Warehouse Stock Matrix'}
                   {activeTab === 'warehouses' && 'European Logistics Hubs & Pallet Capacity'}
@@ -63,6 +64,7 @@ export default function App() {
               </div>
             </div>
           </div>
+          )}
         </main>
       </div>
 
