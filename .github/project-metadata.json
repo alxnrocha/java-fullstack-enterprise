@@ -1,0 +1,27 @@
+{
+  "repository": "alxnrocha/java-fullstack-enterprise",
+  "projectNumber": 20,
+  "projectName": "LogiSync Enterprise",
+  "description": "LogiSync Enterprise — ERP Full Stack, Event-Driven Supply Chain & Global Logistics con React 19 + Java 21 LTS + Spring Boot 3.3 + RabbitMQ + PostgreSQL 17 + Docker Compose",
+  "homepage": "https://alxnrocha.github.io/java-fullstack-enterprise/",
+  "topics": [
+    "react19",
+    "typescript",
+    "tailwindcss",
+    "java21",
+    "spring-boot",
+    "rabbitmq",
+    "event-driven",
+    "outbox-pattern",
+    "postgresql",
+    "flyway",
+    "prometheus",
+    "grafana",
+    "docker-compose",
+    "supply-chain",
+    "logistics",
+    "erp"
+  ],
+  "license": "MIT",
+  "author": "Alex Rocha (@alxnrocha)"
+}
