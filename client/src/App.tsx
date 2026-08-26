@@ -2,22 +2,18 @@ import { Navbar } from './components/layout/Navbar.tsx';
 import { Sidebar } from './components/layout/Sidebar.tsx';
 import { QuickActionModals } from './components/layout/QuickActionModals.tsx';
 import { useSupplyChainStore } from './stores/useSupplyChainStore.ts';
-import { 
-  Building2, 
-  Activity 
-} from 'lucide-react';
-
 import { ExecutiveDashboard } from './components/dashboard/ExecutiveDashboard.tsx';
 import { InventoryMatrix } from './components/inventory/InventoryMatrix.tsx';
 import { PickingTerminal } from './components/picking/PickingTerminal.tsx';
 import { FleetTrackingTower } from './components/tracking/FleetTrackingTower.tsx';
+import { OutboxInspector } from './components/observability/OutboxInspector.tsx';
 
 export default function App() {
   const { activeTab } = useSupplyChainStore();
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans text-slate-900 selection:bg-blue-500/20 selection:text-blue-700">
-      {/* Top Navbar */}
+      {/* Top Institutional Navbar */}
       <Navbar />
 
       {/* Main Workspace Layout */}
@@ -31,32 +27,15 @@ export default function App() {
           {activeTab === 'inventory' && <InventoryMatrix />}
           {activeTab === 'picking' && <PickingTerminal />}
           {(activeTab === 'shipments' || activeTab === 'tracking') && <FleetTrackingTower />}
-          {activeTab !== 'home' && activeTab !== 'inventory' && activeTab !== 'picking' && activeTab !== 'shipments' && activeTab !== 'tracking' && (
-            <div className="clean-card rounded-2xl p-6 bg-white border border-slate-200 shadow-xs">
-            <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                {activeTab === 'warehouses' && <Building2 className="w-5 h-5" />}
-                {activeTab === 'outbox' && <Activity className="w-5 h-5" />}
-              </div>
+          {activeTab === 'outbox' && <OutboxInspector />}
+          {activeTab === 'warehouses' && (
+            <div className="space-y-6">
               <div>
-                <h2 className="text-lg font-bold text-slate-900 capitalize">
-                  {activeTab === 'warehouses' && 'European Logistics Hubs & Pallet Capacity'}
-                  {activeTab === 'outbox' && 'Transactional Outbox & RabbitMQ Observability'}
-                </h2>
-                <p className="text-xs text-slate-500 font-medium">
-                  LogiSync Core v2.4.1 • Reactive Enterprise Supply Chain Platform
-                </p>
+                <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">European Distribution Hubs</h1>
+                <p className="text-sm text-slate-500 font-medium mt-0.5">Automated Pallet Storage & Cross-Docking Capacity</p>
               </div>
+              <ExecutiveDashboard />
             </div>
-
-            <div className="text-xs text-slate-600 space-y-2">
-              <p>Active shell module loaded with responsive layout, search bar and warehouse selector.</p>
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-slate-100 font-mono-code text-[11px] text-slate-700">
-                <span>Active Route:</span>
-                <span className="font-bold text-blue-600">/{activeTab}</span>
-              </div>
-            </div>
-          </div>
           )}
         </main>
       </div>
