@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { 
   Navigation, 
@@ -6,20 +6,70 @@ import {
   Radio, 
   Clock, 
   Gauge, 
-  ExternalLink 
+  ExternalLink,
+  Fuel,
+  Thermometer,
+  ShieldCheck
 } from 'lucide-react';
 import { useSupplyChainStore } from '../../stores/useSupplyChainStore.ts';
+
+interface ActiveTruckTelemetry {
+  id: string;
+  trackingNumber: string;
+  carrier: string;
+  corridor: string;
+  speedKmh: number;
+  progressPercent: number;
+  fuelPercent: number;
+  tempCelsius: number;
+  eta: string;
+  lat: number;
+  lng: number;
+  color: string;
+}
+
+const TRUCKS: ActiveTruckTelemetry[] = [
+  {
+    id: 'trk-1',
+    trackingNumber: 'TRK-45872',
+    carrier: 'DHL Freight Express',
+    corridor: 'Rhône Valley &bull; A7',
+    speedKmh: 84,
+    progressPercent: 78,
+    fuelPercent: 76,
+    tempCelsius: 19.2,
+    eta: '18:40 CEST',
+    lat: 45.3000,
+    lng: 4.8200,
+    color: '#3B82F6'
+  },
+  {
+    id: 'trk-2',
+    trackingNumber: 'TRK-88491',
+    carrier: 'Kuehne + Nagel Logistics',
+    corridor: 'Rhine Industrial &bull; A3',
+    speedKmh: 91,
+    progressPercent: 45,
+    fuelPercent: 68,
+    tempCelsius: 18.5,
+    eta: '21:15 CEST',
+    lat: 50.6800,
+    lng: 7.1500,
+    color: '#10B981'
+  }
+];
 
 export const EuropeRouteMap: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const { setSelectedShipmentTracking, setActiveTab } = useSupplyChainStore();
+  const [selectedTruck, setSelectedTruck] = useState<ActiveTruckTelemetry>(TRUCKS[0]);
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
-    if (mapInstanceRef.current) return; // prevent double initialization
+    if (mapInstanceRef.current) return; // prevent duplicate initialization
 
-    // 1. Initialize Leaflet Map with smooth interaction
+    // 1. Initialize Leaflet Map with smooth interactive dragging
     const map = L.map(mapContainerRef.current, {
       center: [47.5, 4.5],
       zoom: 5,
@@ -31,13 +81,13 @@ export const EuropeRouteMap: React.FC = () => {
 
     mapInstanceRef.current = map;
 
-    // Auto-fit western and central European corridor bounds
+    // Fit Western & Central European corridor bounds adaptively
     map.fitBounds(
       [
-        [40.0, -4.5], // Southwest (Madrid / Iberian Peninsula)
-        [53.2, 14.5], // Northeast (North Sea / Berlin)
+        [39.8, -5.0], // Southwest (Spain/Madrid)
+        [53.4, 14.5], // Northeast (Berlin/North Sea)
       ],
-      { padding: [35, 35] }
+      { padding: [30, 30] }
     );
 
     // 2. High-Definition ESRI Dark Gray Canvas Base (Official, No Watermark, No Key)
@@ -57,130 +107,73 @@ export const EuropeRouteMap: React.FC = () => {
       }
     ).addTo(map);
 
-    // 3. Geographically Exact Logistics Hub Coordinates
+    // 3. European Logistics Hubs (Micro-Capsule Pins - ZERO Collisions!)
     const hubs = [
-      { 
-        name: 'Rotterdam Central', 
-        code: 'W-ROT-01', 
-        lat: 51.8900, 
-        lng: 4.3100, // Maasvlakte / Port of Rotterdam, clearly south of The Hague
-        isMain: true,
-        labelDirection: 'bottom'
-      },
-      { 
-        name: 'Frankfurt Terminal', 
-        code: 'W-FRA-03', 
-        lat: 50.0330, 
-        lng: 8.5700, // Frankfurt Airport CargoCity South
-        isMain: true,
-        labelDirection: 'bottom'
-      },
-      { 
-        name: 'Barcelona Hub', 
-        code: 'W-BCN-02', 
-        lat: 41.3400, 
-        lng: 2.1400, // Port of Barcelona / Zona Franca
-        isMain: true,
-        labelDirection: 'top'
-      },
-      { 
-        name: 'Paris Gateway', 
-        code: 'GW-PAR-01', 
-        lat: 49.0097, 
-        lng: 2.5479, // Roissy Charles-de-Gaulle Cargo
-        isMain: false,
-        labelDirection: 'left'
-      },
-      { 
-        name: 'Milan Transit', 
-        code: 'GW-MIL-02', 
-        lat: 45.4700, 
-        lng: 9.3000, // Interporto di Milano / Segrate Freight Terminal
-        isMain: false,
-        labelDirection: 'bottom'
-      },
-      { 
-        name: 'London Gateway', 
-        code: 'GW-LON-03', 
-        lat: 51.5050, 
-        lng: 0.4700, // DP World London Gateway Deep Sea Port (Thames Estuary, Essex)
-        isMain: false,
-        labelDirection: 'left'
-      },
-      { 
-        name: 'Berlin Hub', 
-        code: 'GW-BER-04', 
-        lat: 52.3600, 
-        lng: 13.3100, // GVZ Berlin South Großbeeren Freight Terminal
-        isMain: false,
-        labelDirection: 'top'
-      },
-      { 
-        name: 'Madrid Hub', 
-        code: 'GW-MAD-05', 
-        lat: 40.4200, 
-        lng: -3.5300, // Puerto Seco de Madrid / Coslada Transport Platform
-        isMain: false,
-        labelDirection: 'bottom'
-      }
+      { code: 'ROT', name: 'Rotterdam Central', desc: 'W-ROT-01 • Deep Sea Hub', lat: 51.8900, lng: 4.3100, isMain: true },
+      { code: 'FRA', name: 'Frankfurt Terminal', desc: 'W-FRA-03 • CargoCity South', lat: 50.0330, lng: 8.5700, isMain: true },
+      { code: 'BCN', name: 'Barcelona Hub', desc: 'W-BCN-02 • Zona Franca Port', lat: 41.3400, lng: 2.1400, isMain: true },
+      { code: 'PAR', name: 'Paris Gateway', desc: 'GW-PAR-01 • Roissy CDG Cargo', lat: 49.0097, lng: 2.5479, isMain: false },
+      { code: 'MIL', name: 'Milan Transit', desc: 'GW-MIL-02 • Interporto Segrate', lat: 45.4700, lng: 9.3000, isMain: false },
+      { code: 'LON', name: 'London Gateway', desc: 'GW-LON-03 • DP World Essex', lat: 51.5050, lng: 0.4700, isMain: false },
+      { code: 'BER', name: 'Berlin Hub', desc: 'GW-BER-04 • GVZ South Großbeeren', lat: 52.3600, lng: 13.3100, isMain: false },
+      { code: 'MAD', name: 'Madrid Central', desc: 'GW-MAD-05 • Coslada Dry Port', lat: 40.4200, lng: -3.5300, isMain: false }
     ];
 
-    // Add Hub Markers with custom DivIcon and collision-free positioning
+    // Add Clean Circular Badge Markers
     hubs.forEach((hub) => {
       const hubHtml = `
-        <div style="display: flex; flex-direction: column; align-items: center; cursor: pointer; transform: translate(-50%, -50%);">
-          <div style="
-            width: ${hub.isMain ? '13px' : '9px'}; 
-            height: ${hub.isMain ? '13px' : '9px'}; 
-            border-radius: 50%; 
-            background: ${hub.isMain ? '#3B82F6' : '#64748B'}; 
-            border: 2px solid #FFFFFF; 
-            box-shadow: 0 0 10px ${hub.isMain ? 'rgba(59, 130, 246, 0.9)' : 'rgba(100, 116, 139, 0.6)'};
-          "></div>
-          <div style="
-            background: rgba(15, 23, 42, 0.94); 
-            border: 1px solid #334155; 
-            border-radius: 4px; 
-            padding: 1.5px 5px; 
-            margin-top: 3px; 
-            white-space: nowrap;
-            color: #FFFFFF; 
-            font-size: ${hub.isMain ? '10px' : '9px'}; 
-            font-weight: 700;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.7);
-          ">
-            ${hub.name}
-          </div>
+        <div style="
+          cursor: pointer; 
+          transform: translate(-50%, -50%); 
+          display: flex; 
+          align-items: center; 
+          justify-content: center;
+          width: ${hub.isMain ? '26px' : '22px'}; 
+          height: ${hub.isMain ? '26px' : '22px'}; 
+          border-radius: 9999px; 
+          background: ${hub.isMain ? '#1E293B' : '#0F172A'}; 
+          border: 1.5px solid ${hub.isMain ? '#3B82F6' : '#64748B'}; 
+          color: ${hub.isMain ? '#60A5FA' : '#CBD5E1'}; 
+          font-family: monospace; 
+          font-size: ${hub.isMain ? '10px' : '9px'}; 
+          font-weight: 800; 
+          box-shadow: 0 0 10px ${hub.isMain ? 'rgba(59, 130, 246, 0.7)' : 'rgba(0,0,0,0.5)'};
+          transition: transform 0.15s ease;
+        ">
+          ${hub.code}
         </div>
       `;
 
       const icon = L.divIcon({
         html: hubHtml,
-        className: 'custom-hub-marker',
+        className: 'hub-chip-marker',
         iconSize: [0, 0],
       });
 
       const marker = L.marker([hub.lat, hub.lng], { icon }).addTo(map);
       marker.bindPopup(`
-        <div style="padding: 4px; font-family: sans-serif;">
-          <h4 style="margin: 0; font-size: 12px; font-weight: 800; color: #60A5FA;">${hub.name}</h4>
-          <p style="margin: 2px 0 0; font-size: 10px; color: #94A3B8;">Code: <strong style="color: #FFF;">${hub.code}</strong></p>
-          <p style="margin: 2px 0 0; font-size: 10px; color: #10B981; font-weight: 600;">● Operational • Cross-docking Active</p>
+        <div style="padding: 4px; font-family: sans-serif; min-width: 140px;">
+          <div style="display: flex; items-center; justify-content: space-between; gap: 6px;">
+            <strong style="color: #60A5FA; font-size: 12px;">${hub.name}</strong>
+            <span style="background: rgba(59, 130, 246, 0.2); color: #93C5FD; font-family: monospace; font-size: 9px; padding: 1px 4px; border-radius: 4px;">${hub.code}</span>
+          </div>
+          <p style="margin: 3px 0 0; font-size: 10px; color: #94A3B8;">${hub.desc}</p>
+          <p style="margin: 4px 0 0; font-size: 10px; color: #10B981; font-weight: 600;">● ASRS Automation Active</p>
         </div>
       `);
     });
 
-    // 4. Real Freight Transit Corridors (Polylines along actual European Motorways)
-    // Corridor 1: Rotterdam -> Antwerp -> Brussels -> Paris -> Lyon -> Barcelona (Western Arterial)
+    // 4. Real Freight Transit Corridors (Neon Arteries)
+    // Corridor 1: Rotterdam -> Antwerp -> Brussels -> Paris -> Lyon -> Barcelona (West Spine)
     const routeRotterdamBarcelona: [number, number][] = [
-      [51.8900, 4.3100], // Rotterdam Port
-      [51.2194, 4.4025], // Antwerp
-      [50.8503, 4.3517], // Brussels
-      [49.0097, 2.5479], // Paris CDG
-      [45.7500, 4.8500], // Lyon
-      [44.1300, 4.8000], // Orange / Rhone Valley
-      [42.7000, 2.8900], // Perpignan
-      [41.3400, 2.1400]  // Barcelona Port
+      [51.8900, 4.3100],
+      [51.2194, 4.4025],
+      [50.8503, 4.3517],
+      [49.0097, 2.5479],
+      [45.7500, 4.8500],
+      [44.1300, 4.8000],
+      [42.7000, 2.8900],
+      [41.3400, 2.1400]
     ];
     L.polyline(routeRotterdamBarcelona, {
       color: '#3B82F6',
@@ -191,13 +184,13 @@ export const EuropeRouteMap: React.FC = () => {
 
     // Corridor 2: Rotterdam -> Duisburg -> Cologne -> Frankfurt -> Nuremberg -> Berlin (Industrial Axis)
     const routeRotterdamBerlin: [number, number][] = [
-      [51.8900, 4.3100], // Rotterdam Port
-      [51.4416, 5.4697], // Eindhoven
-      [50.9375, 6.9603], // Cologne
-      [50.0330, 8.5700], // Frankfurt CargoCity
-      [49.4521, 11.0767], // Nuremberg
-      [51.3397, 12.3731], // Leipzig
-      [52.3600, 13.3100]  // Berlin GVZ
+      [51.8900, 4.3100],
+      [51.4416, 5.4697],
+      [50.9375, 6.9603],
+      [50.0330, 8.5700],
+      [49.4521, 11.0767],
+      [51.3397, 12.3731],
+      [52.3600, 13.3100]
     ];
     L.polyline(routeRotterdamBerlin, {
       color: '#10B981',
@@ -208,10 +201,10 @@ export const EuropeRouteMap: React.FC = () => {
 
     // Corridor 3: Frankfurt -> Basel -> Lucerne -> Milan (Trans-Alpine Axis)
     const routeFrankfurtMilan: [number, number][] = [
-      [50.0330, 8.5700], // Frankfurt CargoCity
-      [47.5596, 7.5886], // Basel
-      [46.2044, 8.9500], // Gotthard / Ticino
-      [45.4700, 9.3000]  // Milan Interporto
+      [50.0330, 8.5700],
+      [47.5596, 7.5886],
+      [46.2044, 8.9500],
+      [45.4700, 9.3000]
     ];
     L.polyline(routeFrankfurtMilan, {
       color: '#8B5CF6',
@@ -220,68 +213,75 @@ export const EuropeRouteMap: React.FC = () => {
       dashArray: '4, 4',
     }).addTo(map);
 
-    // 5. Active Moving Trucks with Anti-Collision Anchoring!
-    // Truck 1: TRK-45872 (DHL Freight) in Rhone Valley (South of Lyon)
-    // Anchored pointing WEST toward Central France (Zero overlap with Italy or Milan!)
-    const truck1Html = `
-      <div style="cursor: pointer; transform: translate(-100%, -50%); display: flex; flex-direction: row; align-items: center; gap: 6px;">
-        <div style="
-          background: rgba(15, 23, 42, 0.95); 
-          border: 1px solid #3B82F6; 
-          border-radius: 6px; 
-          padding: 2.5px 7px; 
-          white-space: nowrap; 
-          box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-        ">
-          <div style="color: #60A5FA; font-family: monospace; font-size: 10px; font-weight: 800;">TRK-45872 (84 km/h)</div>
-          <div style="color: #94A3B8; font-size: 8.5px;">DHL Express &bull; Rhone Corridor &bull; 78%</div>
+    // 5. Active Moving Trucks (Clean Animated Radar Capsule Pins - NO Cluttered Billboards!)
+    TRUCKS.forEach((truck) => {
+      const truckHtml = `
+        <div style="cursor: pointer; transform: translate(-50%, -50%); position: relative; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+          <div style="
+            position: absolute; 
+            inset: 0; 
+            border-radius: 50%; 
+            background: ${truck.color}; 
+            opacity: 0.45; 
+            animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+          "></div>
+          <div style="
+            width: 22px; 
+            height: 22px; 
+            border-radius: 50%; 
+            background: ${truck.color}; 
+            border: 2px solid #FFFFFF; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: #FFFFFF; 
+            box-shadow: 0 0 12px ${truck.color}; 
+            z-index: 10;
+          ">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="3" width="15" height="13"></rect>
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+              <circle cx="5.5" cy="18.5" r="2.5"></circle>
+              <circle cx="18.5" cy="18.5" r="2.5"></circle>
+            </svg>
+          </div>
         </div>
-        <div style="position: relative; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; shrink-0;">
-          <div style="position: absolute; inset: 0; border-radius: 50%; background: #3B82F6; opacity: 0.45; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
-          <div style="width: 9px; height: 9px; border-radius: 50%; background: #2563EB; border: 2px solid #FFFFFF; z-index: 10;"></div>
-        </div>
-      </div>
-    `;
-    const truck1Icon = L.divIcon({ html: truck1Html, className: 'truck-marker-1', iconSize: [0, 0] });
-    const truck1 = L.marker([45.1500, 4.8400], { icon: truck1Icon }).addTo(map);
-    truck1.on('click', () => {
-      setSelectedShipmentTracking('TRK-45872');
-      setActiveTab('tracking');
-    });
+      `;
 
-    // Truck 2: TRK-88491 (Kuehne + Nagel) in Rhine Valley near Bonn
-    // Anchored pointing NORTH toward Cologne/Ruhr (Zero overlap with Frankfurt!)
-    const truck2Html = `
-      <div style="cursor: pointer; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; gap: 4px;">
-        <div style="
-          background: rgba(15, 23, 42, 0.95); 
-          border: 1px solid #10B981; 
-          border-radius: 6px; 
-          padding: 2.5px 7px; 
-          white-space: nowrap; 
-          box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-        ">
-          <div style="color: #34D399; font-family: monospace; font-size: 10px; font-weight: 800;">TRK-88491 (91 km/h)</div>
-          <div style="color: #94A3B8; font-size: 8.5px;">K+N Logistics &bull; Rhine Corridor &bull; 45%</div>
+      const truckIcon = L.divIcon({ html: truckHtml, className: `truck-pin-${truck.id}`, iconSize: [0, 0] });
+      const marker = L.marker([truck.lat, truck.lng], { icon: truckIcon }).addTo(map);
+
+      marker.bindPopup(`
+        <div style="padding: 4px; font-family: sans-serif; min-width: 160px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <strong style="color: ${truck.color}; font-family: monospace; font-size: 12px;">${truck.trackingNumber}</strong>
+            <span style="font-size: 10px; color: #10B981; font-weight: bold;">${truck.speedKmh} km/h</span>
+          </div>
+          <p style="margin: 2px 0 0; font-size: 10px; color: #E2E8F0;">${truck.carrier}</p>
+          <p style="margin: 2px 0 0; font-size: 9.5px; color: #94A3B8;">Corridor: ${truck.corridor}</p>
+          <p style="margin: 4px 0 0; font-size: 10px; color: #60A5FA; font-weight: 600;">Progress: ${truck.progressPercent}% &bull; ETA ${truck.eta}</p>
         </div>
-        <div style="position: relative; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
-          <div style="position: absolute; inset: 0; border-radius: 50%; background: #10B981; opacity: 0.45; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
-          <div style="width: 9px; height: 9px; border-radius: 50%; background: #059669; border: 2px solid #FFFFFF; z-index: 10;"></div>
-        </div>
-      </div>
-    `;
-    const truck2Icon = L.divIcon({ html: truck2Html, className: 'truck-marker-2', iconSize: [0, 0] });
-    const truck2 = L.marker([50.6800, 7.1500], { icon: truck2Icon }).addTo(map);
-    truck2.on('click', () => {
-      setSelectedShipmentTracking('TRK-88491');
-      setActiveTab('tracking');
+      `);
+
+      marker.on('click', () => {
+        setSelectedTruck(truck);
+        setSelectedShipmentTracking(truck.trackingNumber);
+      });
     });
 
     return () => {
       map.remove();
       mapInstanceRef.current = null;
     };
-  }, [setActiveTab, setSelectedShipmentTracking]);
+  }, [setSelectedShipmentTracking]);
+
+  const handleSelectTruck = (truck: ActiveTruckTelemetry) => {
+    setSelectedTruck(truck);
+    setSelectedShipmentTracking(truck.trackingNumber);
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.panTo([truck.lat, truck.lng], { animate: true, duration: 0.8 });
+    }
+  };
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-white overflow-hidden shadow-lg relative">
@@ -327,30 +327,93 @@ export const EuropeRouteMap: React.FC = () => {
       <div className="relative w-full aspect-21/9 min-h-[380px] max-h-[460px] rounded-xl border border-slate-800 overflow-hidden shadow-inner bg-slate-950">
         <div ref={mapContainerRef} className="w-full h-full z-0" />
 
-        {/* Live Truck Telemetry Card Overlay on bottom-left */}
-        <div className="absolute bottom-3 left-3 z-[1000] bg-slate-950/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-3 max-w-xs text-xs space-y-1.5 shadow-xl hidden sm:block">
-          <div className="flex items-center justify-between text-slate-400 text-[10px] font-mono-code">
-            <span className="font-bold text-blue-400">FREIGHT TELEMATICS</span>
-            <span className="text-emerald-400 flex items-center gap-1 font-bold">
+        {/* Interactive Floating Telemetry Control HUD (Bottom-Left) */}
+        <div className="absolute bottom-3 left-3 z-[1000] bg-slate-950/95 backdrop-blur-md border border-slate-700/90 rounded-xl p-3.5 max-w-sm text-xs space-y-2.5 shadow-2xl">
+          {/* HUD Header with Truck Switcher Tabs */}
+          <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-800">
+            <div className="flex items-center gap-1.5">
+              {TRUCKS.map((t) => {
+                const isSelected = selectedTruck.id === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => handleSelectTruck(t)}
+                    className={`px-2 py-0.5 rounded text-[10px] font-mono-code font-bold transition-all ${
+                      isSelected
+                        ? 'bg-blue-600 text-white shadow-2xs'
+                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                    }`}
+                  >
+                    {t.trackingNumber}
+                  </button>
+                );
+              })}
+            </div>
+
+            <span className="text-emerald-400 flex items-center gap-1 font-mono-code text-[10px] font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> ONLINE
             </span>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Truck className="w-4 h-4 text-blue-400" />
-              <span className="font-bold text-white font-mono-code">TRK-45872</span>
+
+          {/* Active Unit Diagnostics */}
+          <div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Truck className="w-4 h-4 text-blue-400 shrink-0" />
+                <div>
+                  <h4 className="font-bold text-white font-mono-code text-xs leading-none">
+                    {selectedTruck.trackingNumber}
+                  </h4>
+                  <span className="text-[10px] text-slate-400">{selectedTruck.carrier}</span>
+                </div>
+              </div>
+              <span className="text-emerald-400 font-bold font-mono-code text-xs">
+                {selectedTruck.progressPercent}% Transit
+              </span>
             </div>
-            <span className="text-emerald-400 font-bold font-mono-code">78% Progress</span>
+
+            {/* Metric Gauges Grid */}
+            <div className="grid grid-cols-4 gap-2 text-[10px] text-slate-300 pt-2.5 mt-2 border-t border-slate-800/80">
+              <div className="p-1.5 bg-slate-900 rounded-lg border border-slate-800">
+                <div className="flex items-center gap-1 text-slate-400">
+                  <Gauge className="w-3 h-3 text-blue-400" />
+                  <span>Speed</span>
+                </div>
+                <div className="font-mono-code font-bold text-white mt-0.5">{selectedTruck.speedKmh} km/h</div>
+              </div>
+
+              <div className="p-1.5 bg-slate-900 rounded-lg border border-slate-800">
+                <div className="flex items-center gap-1 text-slate-400">
+                  <Fuel className="w-3 h-3 text-amber-400" />
+                  <span>Fuel</span>
+                </div>
+                <div className="font-mono-code font-bold text-white mt-0.5">{selectedTruck.fuelPercent}%</div>
+              </div>
+
+              <div className="p-1.5 bg-slate-900 rounded-lg border border-slate-800">
+                <div className="flex items-center gap-1 text-slate-400">
+                  <Thermometer className="w-3.5 h-3 text-emerald-400" />
+                  <span>Temp</span>
+                </div>
+                <div className="font-mono-code font-bold text-white mt-0.5">{selectedTruck.tempCelsius}°C</div>
+              </div>
+
+              <div className="p-1.5 bg-slate-900 rounded-lg border border-slate-800">
+                <div className="flex items-center gap-1 text-slate-400">
+                  <Clock className="w-3 h-3 text-purple-400" />
+                  <span>ETA</span>
+                </div>
+                <div className="font-mono-code font-bold text-white mt-0.5">{selectedTruck.eta}</div>
+              </div>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-300 pt-1 border-t border-slate-800">
-            <div className="flex items-center gap-1">
-              <Gauge className="w-3 h-3 text-slate-400" />
-              <span>Speed: <strong className="text-white font-mono-code">84 km/h</strong></span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3 text-slate-400" />
-              <span>ETA: <strong className="text-white font-mono-code">18:40 CEST</strong></span>
-            </div>
+
+          <div className="flex items-center justify-between text-[9.5px] text-slate-400 pt-1 border-t border-slate-800/60 font-mono-code">
+            <span className="flex items-center gap-1 text-emerald-400 font-semibold">
+              <ShieldCheck className="w-3 h-3" />
+              <span>Cold Chain Secure</span>
+            </span>
+            <span>AMQP Poller Active</span>
           </div>
         </div>
       </div>
